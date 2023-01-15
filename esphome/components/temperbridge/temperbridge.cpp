@@ -97,6 +97,7 @@ Si446xChipInfoResp TemperBridgeComponent::si446x_part_info_() {
 
   return ret;
 }
+
 void TemperBridgeComponent::si446x_execute_command_(uint8_t command, const uint8_t *args, size_t arg_bytes,
                                                     uint8_t *data, size_t data_bytes) {
   assert(data != nullptr);
@@ -110,6 +111,7 @@ void TemperBridgeComponent::si446x_execute_command_(uint8_t command, const uint8
 
   this->si446x_raw_command_(tx_data, arg_bytes + 1, data, data_bytes);
 }
+
 void TemperBridgeComponent::si446x_configuration_init_(const uint8_t *data) {
   while (*data != 0) {
     const size_t size_bytes = *data++;
@@ -291,23 +293,24 @@ void TemperBridgeComponent::execute_simple_command(SimpleCommand cmd) {
       break;
     case SimpleCommand::MASSAGE_PRESET_MODE1:
       command = TemperCommand::MASSAGE_MODE_1;
-      this->massage_head_intensity_ = 5;
-      this->massage_leg_intensity_ = 5;
-      this->massage_lumbar_intensity_ = 5;
-      this->massage_command_mode_ = MassageCommandMode::BUILTIN;
       break;
     case SimpleCommand::MASSAGE_PRESET_MODE2:
       command = TemperCommand::MASSAGE_MODE_2;
-      this->massage_command_mode_ = MassageCommandMode::BUILTIN;
       break;
     case SimpleCommand::MASSAGE_PRESET_MODE3:
       command = TemperCommand::MASSAGE_MODE_3;
-      this->massage_command_mode_ = MassageCommandMode::BUILTIN;
       break;
     case SimpleCommand::MASSAGE_PRESET_MODE4:
       command = TemperCommand::MASSAGE_MODE_4;
-      this->massage_command_mode_ = MassageCommandMode::BUILTIN;
       break;
+  }
+
+  if (cmd == SimpleCommand::MASSAGE_PRESET_MODE1 || cmd == SimpleCommand::MASSAGE_PRESET_MODE2 ||
+      cmd == SimpleCommand::MASSAGE_PRESET_MODE3 || cmd == SimpleCommand::MASSAGE_PRESET_MODE4) {
+    this->massage_head_intensity_ = 5;
+    this->massage_leg_intensity_ = 5;
+    this->massage_lumbar_intensity_ = 5;
+    this->massage_command_mode_ = MassageCommandMode::BUILTIN;
   }
 
   ESP_LOGI(TAG, "TX");
