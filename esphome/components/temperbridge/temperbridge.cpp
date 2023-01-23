@@ -100,8 +100,6 @@ Si446xChipInfoResp TemperBridgeComponent::si446x_part_info_() {
 
 void TemperBridgeComponent::si446x_execute_command_(uint8_t command, const uint8_t *args, size_t arg_bytes,
                                                     uint8_t *data, size_t data_bytes) {
-  assert(data != nullptr);
-
   uint8_t tx_data[arg_bytes + 1];
   tx_data[0] = command;
   if (arg_bytes > 0) {
@@ -384,12 +382,11 @@ void TemperBridgeComponent::si446x_fifo_info_(Si446xFifoInfoResp *ret, bool clea
 }
 
 void TemperBridgeComponent::si446x_start_tx_() {
-  uint8_t start_ret[1];
   uint8_t tx_args[] = {
       0x0,  // channel
       0,    // condition
   };
-  si446x_execute_command_(SI446X_CMD_START_TX, tx_args, sizeof(tx_args), start_ret, sizeof(start_ret));
+  si446x_execute_command_(SI446X_CMD_START_TX, tx_args, sizeof(tx_args), nullptr, 0);
 }
 
 inline float temper_frequency_for_channel(uint16_t channel) {
@@ -450,10 +447,10 @@ void TemperBridgeComponent::si446x_set_property_(Si446xSetPropertyArgs *args, ui
 
 void TemperBridgeComponent::si446x_get_property_(Si446xGetPropertyArgs *args, uint8_t *props) {
   static_assert(sizeof(Si446xGetPropertyArgs) == 3, "wrong size");
-  uint8_t resp[args->num_props + 1];
+  uint8_t resp[args->num_props];
   si446x_execute_command_(SI446X_CMD_GET_PROPERTY, (uint8_t *) args, sizeof(Si446xGetPropertyArgs), (uint8_t *) resp,
-                          args->num_props + 1);
-  memcpy(props, resp + 1, args->num_props);
+                          args->num_props);
+  memcpy(props, resp, args->num_props);
 }
 
 void TemperBridgeComponent::si446x_get_freq_control_properties_(uint8_t *freq_control_inte,
