@@ -52,7 +52,7 @@ struct TemperPacket {
 
 class TemperBridgeComponent : public Component,
                               public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST, spi::CLOCK_POLARITY_LOW,
-                                                    spi::CLOCK_PHASE_LEADING, spi::DATA_RATE_8MHZ> {
+                                                    spi::CLOCK_PHASE_LEADING, spi::DATA_RATE_4MHZ> {
  public:
   void setup() override;
   void loop() override;
