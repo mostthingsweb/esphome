@@ -228,8 +228,6 @@ void TemperBridgeComponent::start_positioning(PositionCommand cmd) {
 }
 
 void TemperBridgeComponent::execute_simple_command(SimpleCommand cmd) {
-  ESP_LOGI(TAG, "OK buddy!");
-
   TemperCommand command;
   switch (cmd) {
     case SimpleCommand::PRESET_FLAT:
@@ -288,13 +286,9 @@ void TemperBridgeComponent::execute_simple_command(SimpleCommand cmd) {
     this->massage_command_mode_ = MassageCommandMode::BUILTIN;
   }
 
-  ESP_LOGI(TAG, "TX");
-
   for (int i = 0; i < 3; i++) {
     this->transmit_command_(static_cast<uint32_t>(command));
   }
-
-  ESP_LOGI(TAG, "done waiting");
 }
 
 void TemperBridgeComponent::transmit_command_(uint32_t command) {
