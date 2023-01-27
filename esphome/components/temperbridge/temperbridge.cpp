@@ -43,7 +43,7 @@ void TemperBridgeComponent::setup() {
 
   Si446xGetIntStatusResp int_status;
   si446x_get_int_status(&int_status, true);
-  int_status.print();
+  //int_status.print();
 
   this->initialized_ = true;
 
@@ -223,30 +223,7 @@ void TemperBridgeComponent::start_positioning(PositionCommand cmd) {
   }
 
   for (int i = 0; i < 5; i++) {
-    const uint32_t tx_start = micros();
     this->transmit_command_(static_cast<uint32_t>(command));
-    this->si446x_start_tx_();
-
-    const uint32_t start_time = millis();
-    while (this->interrupt_pin_->digital_read()) {
-      if (millis() - start_time > 50) {
-        break;
-      }
-    }
-
-    Si446xGetIntStatusResp int_status;
-    si446x_get_int_status(&int_status, true);
-    int_status.print();
-
-    uint32_t tx_diff = micros() - tx_start;
-    ESP_LOGI(TAG, "took %u us to TX one packet", tx_diff);
-
-    while (tx_diff < 100000) {
-      delay(10);
-      tx_diff = micros() - tx_start;
-    }
-
-    ESP_LOGI(TAG, "after delay: took %u us to TX one packet", tx_diff);
   }
 }
 
@@ -314,37 +291,15 @@ void TemperBridgeComponent::execute_simple_command(SimpleCommand cmd) {
   ESP_LOGI(TAG, "TX");
 
   for (int i = 0; i < 3; i++) {
-    const uint32_t tx_start = micros();
     this->transmit_command_(static_cast<uint32_t>(command));
-    this->si446x_start_tx_();
-
-    const uint32_t start_time = millis();
-    while (this->interrupt_pin_->digital_read()) {
-      ESP_LOGE(TAG, "interrupt timeout!");
-      if (millis() - start_time > 50) {
-        break;
-      }
-    }
-
-    Si446xGetIntStatusResp int_status;
-    si446x_get_int_status(&int_status, true);
-    int_status.print();
-
-    uint32_t tx_diff = micros() - tx_start;
-    ESP_LOGI(TAG, "took %u us to TX one packet", tx_diff);
-
-    while (tx_diff < 100000) {
-      delay(10);
-      tx_diff = micros() - tx_start;
-    }
-
-    ESP_LOGI(TAG, "after delay: took %u us to TX one packet", tx_diff);
   }
 
   ESP_LOGI(TAG, "done waiting");
 }
 
 void TemperBridgeComponent::transmit_command_(uint32_t command) {
+  const uint32_t tx_start = micros();
+
   // This command doesn't need to wait for CTS
   uint8_t packet_bytes[9] = {0};
   static_assert(sizeof(TemperPacket) == 7, "wrong size");
@@ -358,6 +313,29 @@ void TemperBridgeComponent::transmit_command_(uint32_t command) {
   this->enable();
   this->write_array(packet_bytes, sizeof(packet_bytes));
   this->disable();
+
+  this->si446x_start_tx_();
+
+  const uint32_t start_time = millis();
+  while (this->interrupt_pin_->digital_read()) {
+    if (millis() - start_time > 50) {
+      break;
+    }
+  }
+
+  Si446xGetIntStatusResp int_status;
+  si446x_get_int_status(&int_status, true);
+  //int_status.print();
+
+  uint32_t tx_diff = micros() - tx_start;
+  ESP_LOGI(TAG, "took %u us to TX one packet", tx_diff);
+
+  while (tx_diff < 100000) {
+    delay(10);
+    tx_diff = micros() - tx_start;
+  }
+
+  ESP_LOGI(TAG, "after delay: took %u us to TX one packet", tx_diff);
 }
 
 void TemperBridgeComponent::loop() {
@@ -529,31 +507,7 @@ void TemperBridgeComponent::set_massage_level(MassageTarget target, uint8_t leve
 
   // TODO: De-dupe
   for (int i = 0; i < 3; i++) {
-    const uint32_t tx_start = micros();
     this->transmit_command_(static_cast<uint32_t>(command));
-    this->si446x_start_tx_();
-
-    const uint32_t start_time = millis();
-    while (this->interrupt_pin_->digital_read()) {
-      ESP_LOGE(TAG, "interrupt timeout!");
-      if (millis() - start_time > 50) {
-        break;
-      }
-    }
-
-    Si446xGetIntStatusResp int_status;
-    si446x_get_int_status(&int_status, true);
-    int_status.print();
-
-    uint32_t tx_diff = micros() - tx_start;
-    ESP_LOGI(TAG, "took %u us to TX one packet", tx_diff);
-
-    while (tx_diff < 100000) {
-      delay(10);
-      tx_diff = micros() - tx_start;
-    }
-
-    ESP_LOGI(TAG, "after delay: took %u us to TX one packet", tx_diff);
   }
 }
 
