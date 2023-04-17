@@ -1,0 +1,370 @@
+substitutions:
+  devicename: bedroom1
+  upper_devicename: Bedroom1
+
+esphome:
+  name: temperbridge
+  name_add_mac_suffix: true
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret encryption_key
+
+ota:
+  password: !secret password
+
+wifi:
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "TemperBridge Wifi Config"
+    password: !secret password
+
+# Enable logging
+logger:
+
+captive_portal:
+
+# Uncomment below lines to enable the web server.
+#web_server:
+#  js_include: "temperbridge.js"
+#  auth:
+#    username: "temper"
+#    password: !secret password
+
+esp32_improv:
+  authorizer: other_button
+
+improv_serial:
+
+binary_sensor:
+  - platform: gpio
+    id: other_button
+    name: ${upper_devicename} Physical Reset Button
+    pin:
+      number: GPIO0
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    on_click:
+      min_length: 10000ms
+      then:
+        - button.press: ${devicename}_factory_reset
+
+temperbridge:
+  id: ${devicename}_bed
+  cs_pin: 5
+  sdn_pin: 14
+  interrupt_pin: 27
+
+spi:
+  clk_pin: 18
+  miso_pin: 19
+  mosi_pin: 23
+
+# Red LED
+status_led:
+  pin: GPIO2
+
+# Green LED
+output:
+  - platform: ledc
+    pin: GPIO16
+    id: ${devicename}_status_led_output
+
+light:
+  - platform: monochromatic
+    output: ${devicename}_status_led_output
+    name: "${upper_devicename} Green LED"
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+button:
+  - platform: factory_reset
+    id: ${devicename}_factory_reset
+    name: ${upper_devicename} Restart with Factory Default Settings
+  - platform: template
+    name: ${upper_devicename} Flat
+
+    # Optional variables:
+    icon: "mdi:seat-flat"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "flat"
+  - platform: template
+    name: ${upper_devicename} Preset 1
+
+    icon: "mdi:numeric-1-box"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "mode_1"
+  - platform: template
+    name: ${upper_devicename} Preset 2
+
+    icon: "mdi:numeric-2-box"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "mode_2"
+  - platform: template
+    name: ${upper_devicename} Preset 3
+
+    icon: "mdi:numeric-3-box"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "mode_3"
+  - platform: template
+    name: ${upper_devicename} Preset 4
+
+    icon: "mdi:numeric-4-box"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "mode_4"
+  - platform: template
+    name: ${upper_devicename} Save Preset 1
+
+    icon: "mdi:content-save-settings-outline"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "save_preset_mode1"
+
+  - platform: template
+    name: ${upper_devicename} Save Preset 2
+
+    icon: "mdi:content-save-settings-outline"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "save_preset_mode2"
+
+  - platform: template
+    name: ${upper_devicename} Save Preset 3
+
+    icon: "mdi:content-save-settings-outline"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "save_preset_mode3"
+
+  - platform: template
+    name: ${upper_devicename} Save Preset 4
+
+    icon: "mdi:content-save-settings-outline"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "save_preset_mode4"
+
+  - platform: template
+    name: ${upper_devicename} Massage Mode 1
+
+    icon: "mdi:wave"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "massage_mode_1"
+      - lambda: |-
+          auto call = id(${devicename}_head_massage_intensity).make_call();
+          call.set_value(5);
+          call.perform();
+
+          auto call2 = id(${devicename}_lumbar_massage_intensity).make_call();
+          call2.set_value(5);
+          call2.perform();
+
+          auto call3 = id(${devicename}_legs_massage_intensity).make_call();
+          call3.set_value(5);
+          call3.perform();
+
+  - platform: template
+    name: ${upper_devicename} Massage Mode 2
+
+    icon: "mdi:sine-wave"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "massage_mode_2"
+      - lambda: |-
+          auto call = id(${devicename}_head_massage_intensity).make_call();
+          call.set_value(5);
+          call.perform();
+
+          auto call2 = id(${devicename}_lumbar_massage_intensity).make_call();
+          call2.set_value(5);
+          call2.perform();
+
+          auto call3 = id(${devicename}_legs_massage_intensity).make_call();
+          call3.set_value(5);
+          call3.perform();
+
+  - platform: template
+    name: ${upper_devicename} Massage Mode 3
+
+    icon: "mdi:waves"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "massage_mode_3"
+      - lambda: |-
+          auto call = id(${devicename}_head_massage_intensity).make_call();
+          call.set_value(5);
+          call.perform();
+
+          auto call2 = id(${devicename}_lumbar_massage_intensity).make_call();
+          call2.set_value(5);
+          call2.perform();
+
+          auto call3 = id(${devicename}_legs_massage_intensity).make_call();
+          call3.set_value(5);
+          call3.perform();
+
+  - platform: template
+    name: ${upper_devicename} Massage Mode 4
+
+    icon: "mdi:reorder-vertical"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "massage_mode_4"
+      - lambda: |-
+          auto call = id(${devicename}_head_massage_intensity).make_call();
+          call.set_value(5);
+          call.perform();
+
+          auto call2 = id(${devicename}_lumbar_massage_intensity).make_call();
+          call2.set_value(5);
+          call2.perform();
+
+          auto call3 = id(${devicename}_legs_massage_intensity).make_call();
+          call3.set_value(5);
+          call3.perform();
+
+  - platform: template
+    name: ${upper_devicename} Stop
+
+    icon: "mdi:stop"
+    on_press:
+      - temperbridge.execute_simple_command:
+          id: ${devicename}_bed
+          cmd: "stop"
+      - lambda: |-
+          auto call = id(${devicename}_head_massage_intensity).make_call();
+          call.set_value(0);
+          call.perform();
+
+          auto call2 = id(${devicename}_lumbar_massage_intensity).make_call();
+          call2.set_value(0);
+          call2.perform();
+
+          auto call3 = id(${devicename}_legs_massage_intensity).make_call();
+          call3.set_value(0);
+          call3.perform();
+
+  - platform: template
+    name: ${upper_devicename} Head Up
+
+    icon: "mdi:seat-flat-angled"
+    on_press:
+      - temperbridge.position_command_2:
+          id: ${devicename}_bed
+          cmd: "raise_head"
+  - platform: template
+    name: ${upper_devicename} Head Down
+
+    icon: "mdi:seat-flat-angled"
+    on_press:
+      - temperbridge.position_command_2:
+          id: ${devicename}_bed
+          cmd: "lower_head"
+  - platform: template
+    name: ${upper_devicename} Legs Up
+
+    icon: "mdi:seat-legroom-extra"
+    on_press:
+      - temperbridge.position_command_2:
+          id: ${devicename}_bed
+          cmd: "raise_legs"
+  - platform: template
+    name: ${upper_devicename} Legs Down
+
+    icon: "mdi:seat-legroom-normal"
+    on_press:
+      - temperbridge.position_command_2:
+          id: ${devicename}_bed
+          cmd: "lower_legs"
+number:
+  - platform: template
+    # Example number configuration
+    name: ${upper_devicename} Channel
+
+    # Optional variables:
+    icon: "mdi:counter"
+
+    min_value: 1
+    max_value: 9999
+    step: 1
+    optimistic: true
+    restore_value: true
+    mode: box
+
+    on_value:
+      then:
+        - temperbridge.set_channel:
+            id: ${devicename}_bed
+            channel: !lambda "return x;"
+
+  - platform: template
+    name: ${upper_devicename} Head Massage Intensity
+    id: ${devicename}_head_massage_intensity
+    icon: "mdi:head-dots-horizontal"
+    min_value: 0
+    max_value: 10
+    step: 1
+    optimistic: true
+    on_value:
+      then:
+        temperbridge.set_massage_intensity:
+          id: ${devicename}_bed
+          target: head
+          level: !lambda "return x;"
+
+  - platform: template
+    name: ${upper_devicename} Lumbar Massage Intensity
+    id: ${devicename}_lumbar_massage_intensity
+    min_value: 0
+    max_value: 10
+    step: 1
+    optimistic: true
+    on_value:
+      then:
+        temperbridge.set_massage_intensity:
+          id: ${devicename}_bed
+          target: lumbar
+          level: !lambda "return x;"
+
+  - platform: template
+    name: ${upper_devicename} Leg Massage Intensity
+    id: ${devicename}_legs_massage_intensity
+    min_value: 0
+    max_value: 10
+    step: 1
+    optimistic: true
+    on_value:
+      then:
+        temperbridge.set_massage_intensity:
+          id: ${devicename}_bed
+          target: legs
+          level: !lambda "return x;"
