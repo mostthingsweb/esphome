@@ -45,7 +45,7 @@ improv_serial:
 binary_sensor:
   - platform: gpio
     id: other_button
-    name: ${upper_devicename} Physical Reset Button
+    name: ${upper_devicename} Factory Button
     pin:
       number: GPIO0
       mode:
