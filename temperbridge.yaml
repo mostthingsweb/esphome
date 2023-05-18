@@ -54,6 +54,7 @@ binary_sensor:
       inverted: true
     on_click:
       min_length: 10000ms
+      max_length: 30000ms
       then:
         - button.press: ${devicename}_factory_reset
 
